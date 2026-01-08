@@ -1,207 +1,104 @@
-Thanks for your continued interest in Hometap. We’re enthusiastic about what we’re doing and hope to share some of that excitement with you. To help us evaluate how you approach problems and collaborate, we've designed a small exercise that allows you to showcase your skills without requiring an extensive time commitment.
-
-This exercise should take 2-4 hours to complete. Please reach out if you have questions, and submit your work through GitHub or bundled source code with instructions for running the application.
-
-For GitHub submissions, please make your repository private and invite the users provided by your point of contact. (For the EMs, include:  `gregmundy`, `mobilemike`, `cgallemore`)
+# Solution Documentation
 
 ## Project Overview
 
-At Hometap, we help homeowners access their homes' equity without increasing their debt burden. To effectively serve our customers, we integrate with several third-party data providers to retrieve data required for decision-making. For this exercise, imagine you’re creating a small application that enables us to present a subset of property data pulled from two of our automated valuation model (AVM) providers. This data helps us determine a given property's value without conducting time-consuming and expensive traditional appraisals.
+This project contains both backend and frontEnd solutions based on a homeTap test exercise with a given templates.
+The exercise allows a user to input an address and some property providers will be displayed as a result of this address search.
+Backend and FrontEnd are communicating via REST API.
 
-## Your Task
+## Deployment
 
-Build a simple application with the following components:
+See [STARTER_TEMPLATE](STARTER_TEMPLATE.md) setup instructions section
 
-1. Backend Service
-    - Create a Python-based web service (using libraries like Flask, FastAPI, or Django) that integrates with the provided third-party APIs to retrieve property details from two of our AVM providers.
-    - Expose a single endpoint that standardizes the responses received from both providers into a single, consistent response.
-    - Consider maintainability by designing the service to make it easy to swap out the third-party APIs in the future.
+## Architecture
 
-2. Frontend Interface
-    - Create a minimal web page using a framework of your choice (React, Vue.js, or plain HTML/JavaScript).
-    - The page should:
-        - Allow the user to input an address.
-        - Display a subset of the property details for both providers for easy review (see mock below).
-        - Retrieve all relevant data from the API constructed in Part 1.
-    - Typically, our design team provides clear guidance on how user interfaces should look and operate; however, given that this is a proof-of-concept, we only have a simple mockup to work with.
+### Backend Architecture
 
-![Provider 1 and 2 Layout](assets/Provider1_2.png)
+Backend use Django framework and a template was delivered by hometap with a basic application called properties.
+The backend was extended to have a shared application (also known as common) where different services, schemas, models, repositories, exceptions, decorators, etc. can be found and used across multiple applications
+The property app was changed in order to fit into a DDD architecture, yet this was not fully delivered since django already has a structure for every application that must be preserved. Even with that limitation the application has different layers on which data, business rules or logic, validation and different layers has its responsibilities well defined.
 
-3. Bonus (OPTIONAL)
-    - Add simple error handling (e.g., display an error message if the API call fails).
-    - Style the page with essential CSS for a more polished appearance.
+### Frontend Architecture
 
-## Deliverables
+FrontEnd is using React and a template with an unique Component (app component) was delivered by hometap.
+This application was extended to have now routing features and different components per navigation page and reusable components (such as SearchBar).
+Every one of those new components have its own responsibilities well defined and both states and props are well managed between them.
+This will help future developers to easily extend the frontEnd application with new features.
 
-1. A Github repository with:
-    - The code for both the backend and frontend.
-    - A README with clear setup instructions and explanations of your design choices.
+## Implemented Features
 
-## Notes
+### Core Functionality
 
-- Focus on building something functional and straightforward within 2-4 hours.
-- Please include your ideas for extending this solution (e.g., improving scalability or adding features) in the README.
-- You do not need to implement complex deployment processes or advanced UI features.
-- Property details are subject to change as new information is provided, so the providers cache the property details for up to 24 hours.
+Application will retrieve different provider properties by a given address. The address will be validated and (by now) only two properties will be retrieved and shown in a table.
 
-## AI Tools
+### API Endpoints
 
-You may use AI-assisted coding tools during this assessment. However, please clearly identify any code or solutions generated with AI assistance in your comments or documentation.
+The backend currently exposes a single API endpoint.
 
-## Ownership
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| GET    | /properties?address=xyz | Find property details by address |
 
-Your submission must represent work you fully understand and can explain in detail. You should be comfortable discussing every aspect of your solution during follow-up interviews.
+## Technical Implementation Details
 
-## Starter Template
+### Backend Implementation
 
-As part of this coding exercise, we’ve provided a **starter template** to help streamline your workflow and minimize time spent on boilerplate setup. The template includes:
+Backend is extended with:
 
-- **backend:** A Django project preconfigured with environment variable support, an example endpoint for handling query parameters, and helpful utilities for API responses.
-- **frontend:** A Vite with TypeScript project, preconfigured to work with Tailwind CSS for a responsive and modern UI. It includes a basic setup for making API calls and rendering data dynamically.
+- **ThreadPoolExecutor**: Concurrency at the moment of property retrieval process on external service
+- **Property service**: handle all business rules related to properties (Not a single rule exist by now but a example can be given: Hide all properties which size are bigger than X defined by business)
+- **External property repository**: In charge of retrieving in parallel different property given by providers
+- **Exception handler decorator**: Decorator function what will wrap methods to ensure that exceptions are well handled in an unique way, such as logging or hidding error messages that has sensible information
+- **Schemas**: Validate incomming data with pydantic library
+- **Exceptions**: Custom exceptions with default messages and status codes
 
-While we **highly recommend** using this template as a base to avoid unnecessary setup time, you are welcome to create your own project from scratch if you prefer. However, using the template will allow you to focus more on the core functionality of the exercise rather than configuration details.
+Also the following files were changed:
 
-If you choose to use the template, instructions for setup are included in the [STARTER_TEMPLATE.md](STARTER_TEMPLATE.md) file. If you encounter any issues, feel free to troubleshoot as part of the exercise or adapt the setup to your needs.
+- **urls**: Change how the view were invoked (classes instead of methods)
+- **views**: Changed from single methods to classes
+- **test**: Changed assert test message to reflect custom error default message
+- **settings**: New setting properties were added reflecting the .env.example given
 
-Happy coding!
+### Frontend Implementation
 
-## Third-Party APIs Overview
+FrontEnd also changed and the application no longer has one single component with all responsibility but 5 or more that will be described below:
 
-For this exercise, you will integrate with two property details providers, Provider 1 and Provider 2. Please note that these APIs simulate what you may work with within a real scenario, and no actual personal data is stored or retrieved.
+- **HomePage**: HomePage component that will only display hometap title and search bar
+- **HometapTitle**: Component that will render hometap title. On click it will navigate to homePage
+- **PropertyResultsPage**: Component that will render hometap title, search bar with current search terms (by params) and a propertyTable if data is retrieved succesfully (otherwise only an error will be shown)
+- **PropertyTable**: Component that will render a table with specific properties (given on assets)
+- **SearchBar**: Component that will render a search bar composed by an input and a search button. Handler functions are passed as props
 
-### Provider 1
+Routing was added on the App Component so we have two navigation routes:
 
-**API Endpoint:** https://property-detail-api.fly.dev/provider-1/property
+- /: HomePage
+- /properties?address=xyz: PropertyResultsPage
 
-**API Key:**  3e1a9f18-86c7-4e11-babe-4fd2c7e5e12d
+## Challenges & Solutions
 
-#### Example Usage (cURL)
+One of the challenges found during this technical test that I found was that the results given by providers are not always the same (json properties are not camelCase, they sometimes has UpperCase at the beggining, or some properties may change its full name. Ex: "LotSizeAcres" are sometimes "LotSizeSqFt").
+In order to solve this a normalization process was delivered on the frontEnd application (ease the responsiblities at backend side and avoid cost on server side). This process will standarize to a specific key name for all provider data that are comming from the backend.
 
-```bash
-$ curl -X GET "https://property-detail-api.fly.dev/provider-1/property?address=123%20Main%20St,%20Anytown,%20USA" \ -H "X-API-KEY: your-api-key" \ -H "Accept: application/json"
-```
+Another challenge that I found was that once the ThreadPoolExecutor implementation was done, the order of the providers was affected (sometimes it will show provider 2 first and provider 1 second). To solve this a new property was attached (order) in all provider properties at backend level. This was received in the frontEnd and the incomming results keys were sorted so the table will always show the requested order for all providers (This is dynamically done so in the scenario more property providers are given on the response they will be shown correctly on the table)
 
-#### Example Response Payload
+## Future Enhancements & Extensions
 
-```json
-{
-   "data": {
-       "id": "5000-Main-Street-Boston-MA-144124",
-       "formattedAddress": "5000 Main Street Boston MA 144124",
-       "addressLine1": "5000 Main Street",
-       "addressLine2": "Suite 10",
-       "city": "Boston",
-       "state": "MA",
-       "zipCode": "144124",
-       "county": "Unknown",
-       "latitude": 35.181241,
-       "longitude": -84.753462,
-       "propertyType": "Townhouse",
-       "bedrooms": 2,
-       "bathrooms": 4,
-       "squareFootage": 1911,
-       "lotSizeSqFt": 7778,
-       "yearBuilt": 1924,
-       "assessorID": "94863-882-8791",
-       "legalDescription": "CB 6641 BLK 10 LOT 18",
-       "subdivision": "None",
-       "zoning": "RM",
-       "lastSaleDate": "2004-06-06T00:00:00.000Z",
-       "lastSalePrice": 262181,
-       "hoa": {
-           "fee": 475
-       },
-       "features": {
-           "architectureType": "Colonial",
-           "cooling": true,
-           "coolingType": "Window Unit",
-           "exteriorType": "Brick",
-           "fireplace": true,
-           "fireplaceType": "Prefabricated",
-           "floorCount": 3,
-           "foundationType": "Basement",
-           "garage": true,
-           "garageSpaces": 2,
-           "garageType": "Detached",
-           "heating": true,
-           "heatingType": "Electric",
-           "pool": false,
-           "poolType": "Concrete",
-           "roofType": "Metal",
-           "roomCount": 3,
-           "unitCount": 3,
-           "viewType": "Mountain",
-           "septicSystem": false
-       },
-       "taxAssessments": {
-           "2023": {
-               "year": 2023,
-               "value": 167224,
-               "land": 70250,
-               "improvements": 371579
-           }
-       },
-       "propertyTaxes": {
-           "2023": {
-               "year": 2023,
-               "total": 4761
-           }
-       },
-       "history": {
-           "2021-01-28": {
-               "event": "Sale",
-               "date": "2018-09-16T00:00:00.000Z",
-               "price": 498233
-           }
-       }
-   },
-   "cached": false
-}
-```
+### Short-term Improvements
 
-### Provider 2
+- **Integrate address**: Right now address is just being validated, but not used for retrieving properties, they are randomly generated on external service
 
-**API Endpoint:** https://property-detail-api.fly.dev/provider-2/property
+### Long-term Enhancements
 
-**API Key:**  9f3b5c32-77a4-423c-b63f-90c123e6c1a8
+- **Authentication/Authorization**: Application will have an authorization & authentication layer on which every user has its preferences and related entities (Ex: my properties, my loans, etc)
+- **Provider/Consumer component** Share states across mutliple comsumer componenets. This will avoid some components with overloaded states
 
-#### Example Usage (cURL)
+## Use of AI tools
 
-```bash
-$ curl -X GET "https://property-detail-api.fly.dev/provider-2/property?address=123%20Main%20St,%20Anytown,%20USA" \ -H "X-API-KEY: your-api-key" \ -H "Accept: application/json"
-```
+Claude Code was used at some part of this development process, specially on the following aspects:
 
-#### Example Response Payload
+- Html & Css generating code (some given html code was not mobile friendly)
+- PropertyResultPage normalization and format methods (To fasten the solution on the detected & mentioned challenge that was found)
 
-```json
-{
-   "data": {
-       "ID": "5000-Main-Street-Boston-MA-144124",
-       "NormalizedAddress": "5000 Main Street Boston MA 144124",
-       "Address1": "5000 Main Street",
-       "Address2": null,
-       "City": "Boston",
-       "State": "MA",
-       "PostalCode": "144124",
-       "ArchitecturalStyle": "Ranch",
-       "PropertyType": "Single Family",
-       "Bedrooms": 2,
-       "Bathrooms": 4,
-       "SquareFootage": 1521,
-       "LotSizeAcres": 0.19,
-       "YearConstructed": 1922,
-       "HomeownerAssociationFee": 370,
-       "LastSaleDate": "2018-11-28T00:00:00.000Z",
-       "LastSalePrice": 135147,
-       "RoomCount": 3,
-       "UnitCount": 2,
-       "GarageSpaces": 3,
-       "GarageType": "Attached",
-       "SepticSystem": true,
-       "Cooling": "Central",
-       "Heating": "Radiant",
-       "SalePrice": 135147
-   },
-   "cached": false
-}
-```
+## Lessons Learned & Conclusion
+
+As a cloud/backend developer it was very interesting to use again React (I took some courses long time ago and the basic knowledge on how to use components, their states and props was very interesting). I took some decisions at backend and frontEnd level with the collected expertise on previous job experiences and felt happy to reflect those in this technical challenge
