@@ -100,7 +100,6 @@ Another challenge that I found was that once the ThreadPoolExecutor implementati
 
 ### Short-term Improvements
 
-- **FrontEnd validations**: Route validations when the parameters are empty should be applied
 - **Property per provider**: Since the business logic is still somehow unknown some properties looks like missmatched on the frontEnd. A requirement landing will help fix this kind of issues (Lot Size (Acres) is the one with the only difference between providers)
 - **Integrate address**: Right now address is just being validated, but not used for retrieving properties, they are randomly generated on external service
 - **Segregate apps on different repositories**: More control over specific applications across the team

@@ -39,6 +39,8 @@ const PropertyResultsPage: React.FC = () => {
     if (address) {
       setSearchTerm(address);
       performSearch(address);
+    } else {
+      navigate("/");
     }
   }, [searchParams]);
 
