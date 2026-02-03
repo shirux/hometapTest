@@ -4,15 +4,15 @@ import SearchBar from "./SearchBar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import HometapTitle from "./HometapTitle";
 import PropertyTable from "./PropertyTable";
+import { IProvider } from "../interfaces";
 
 const PropertyResultsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [apiResponse, setApiResponse] = useState<any>(null);
+  const [apiResponse, setApiResponse] = useState<IProvider | null>(null);
   const [loading, setLoading] = useState(false);
-  const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
 
   const searchInProgress = useRef(false);
 
@@ -23,7 +23,7 @@ const PropertyResultsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchPropertyDetails(backendApiUrl, address);
+      const data = await fetchPropertyDetails(address);
       setApiResponse(data.providers);
     } catch (error) {
       setApiResponse(null);

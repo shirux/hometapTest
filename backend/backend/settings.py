@@ -93,7 +93,6 @@ DATABASES = {
 EXTERNAL_PROPERTY_SERVICE = {
     "URL": os.getenv("PROVIDER_1_BASE_URL"),
     "API_KEY": os.getenv("PROVIDER_1_API_KEY"),
-    "FETCH_LIMIT": int(os.getenv('PROPERTY_FETCH_LIMIT', '2')),
 }
 
 

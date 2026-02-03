@@ -2,13 +2,11 @@ from django.http import JsonResponse
 from django.views import View
 
 from properties.services.property_service import PropertyService
-from properties.domain.schemas import AddressRequestInput
+from properties.domain.inputs import AddressRequestInput
 from shared.decorators.exceptions_decorator import handle_errors
 
 class PropertyView(View):
-    def __init__(self):
-        super().__init__()
-        self.property_service = PropertyService()
+    property_service = PropertyService()
 
     @handle_errors("Get properties")
     def get(self, request):

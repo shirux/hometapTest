@@ -10,3 +10,4 @@ class AddressRequestInput(BaseModel):
         if not v or (isinstance(v, str) and not v.strip()):
             raise InvalidAddressException("Address cannot be empty or whitespace")
         return v.strip()
+    

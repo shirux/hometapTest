@@ -6,9 +6,23 @@ This project contains both backend and frontEnd solutions based on a homeTap tes
 The exercise allows a user to input an address and some property providers will be displayed as a result of this address search.
 Backend and FrontEnd are communicating via REST API.
 
+## Requirements
+
+The following tools are required to start this project:
+
+- Docker
+
 ## Deployment
 
-See [STARTER_TEMPLATE](STARTER_TEMPLATE.md) setup instructions section
+A .env.example file will be found on the root folder.
+Duplicate this file and rename it to .env. Set the needed variables for the project to be executed and communicated correctly
+
+Once the .env file is created and Docker is running on your local machine the following commands must be executed
+
+```sh
+docker-compose build
+docker-compose up
+```
 
 ## Architecture
 
@@ -49,6 +63,7 @@ Backend is extended with:
 - **Property service**: handle all business rules related to properties (Not a single rule exist by now but a example can be given: Hide all properties which size are bigger than X defined by business)
 - **External property repository**: In charge of retrieving in parallel different property given by providers
 - **Exception handler decorator**: Decorator function what will wrap methods to ensure that exceptions are well handled in an unique way, such as logging or hidding error messages that has sensible information
+- **Base Provider repository**: Provider Parent class responsible for retrieving data from one provider and then serializing it to a specific format
 - **Schemas**: Validate incomming data with pydantic library
 - **Exceptions**: Custom exceptions with default messages and status codes
 
@@ -77,7 +92,7 @@ Routing was added on the App Component so we have two navigation routes:
 ## Challenges & Solutions
 
 One of the challenges found during this technical test that I found was that the results given by providers are not always the same (json properties are not camelCase, they sometimes has UpperCase at the beggining, or some properties may change its full name. Ex: "LotSizeAcres" are sometimes "LotSizeSqFt").
-In order to solve this a normalization process was delivered on the frontEnd application (ease the responsiblities at backend side and avoid cost on server side). This process will standarize to a specific key name for all provider data that are comming from the backend.
+In order to solve this issue a parent class was created on the backend that use a pydantic object to serialize correctly different formats for different providers. Each children class will extend from this and have a specific serializer method implemented on the pydantic object. This will allow the application to be easily maintainable and more flexible.
 
 Another challenge that I found was that once the ThreadPoolExecutor implementation was done, the order of the providers was affected (sometimes it will show provider 2 first and provider 1 second). To solve this a new property was attached (order) in all provider properties at backend level. This was received in the frontEnd and the incomming results keys were sorted so the table will always show the requested order for all providers (This is dynamically done so in the scenario more property providers are given on the response they will be shown correctly on the table)
 
@@ -86,11 +101,13 @@ Another challenge that I found was that once the ThreadPoolExecutor implementati
 ### Short-term Improvements
 
 - **Integrate address**: Right now address is just being validated, but not used for retrieving properties, they are randomly generated on external service
+- **Segregate apps on different repositories**: More control over specific applications across the team
 
 ### Long-term Enhancements
 
 - **Authentication/Authorization**: Application will have an authorization & authentication layer on which every user has its preferences and related entities (Ex: my properties, my loans, etc)
-- **Provider/Consumer component** Share states across mutliple comsumer componenets. This will avoid some components with overloaded states
+- **Provider/Consumer component**: Share states across mutliple comsumer componenets. This will avoid some components with overloaded states
+- **Provider turn ON/OFF**: Instead of the hardcoded providers the team can move them to an object within an AWS appConfig to have a better control on which should be working at a specific moment of time
 
 ## Use of AI tools
 
@@ -98,6 +115,7 @@ Claude Code was used at some part of this development process, specially on the 
 
 - Html & Css generating code (some given html code was not mobile friendly)
 - PropertyResultPage normalization and format methods (To fasten the solution on the detected & mentioned challenge that was found)
+- Testings
 
 ## Lessons Learned & Conclusion
 

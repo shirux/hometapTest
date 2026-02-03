@@ -1,9 +1,11 @@
-export const fetchPropertyDetails = async (
-  backendApiUrl: string,
-  address: string
-) => {
+import { IProvidersResponse } from "../interfaces";
+
+const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
+
+export const fetchPropertyDetails = async (address: string) => {
+  console.log("backendApiUrl", backendApiUrl);
   const url = `${backendApiUrl}/properties?address=${encodeURIComponent(
-    address
+    address,
   )}`;
   try {
     const response = await fetch(url);
@@ -12,7 +14,7 @@ export const fetchPropertyDetails = async (
       throw new Error("Network response was not ok");
     }
 
-    return await response.json();
+    return (await response.json()) as IProvidersResponse;
   } catch (error) {
     console.error("Error fetching property details:", error);
     throw error;
